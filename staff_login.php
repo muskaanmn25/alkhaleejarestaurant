@@ -9,13 +9,17 @@ if(isset($_POST['login'])) {
 
     $query = "SELECT * FROM staff WHERE email='$email' AND password='$password'";
     $result = mysqli_query($conn, $query);
-
     if(mysqli_num_rows($result) > 0){
-        $_SESSION['staff'] = $email;
-        header("Location: staff_panel.php");
-    } else {
-        $error = "Invalid Email or Password!";
-    }
+
+    $row = mysqli_fetch_assoc($result);
+
+    $_SESSION['staff_id'] = $row['staff_id'];
+    $_SESSION['full_name'] = $row['name'];
+    $_SESSION['role'] = $row['role'];
+
+    header("Location: staff_dashboard.php");
+    exit();
+}
 }
 ?>
 
