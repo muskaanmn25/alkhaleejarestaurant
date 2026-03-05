@@ -1,53 +1,42 @@
 <?php
 session_start();
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-/* LOGIN CHECK */
-if(!isset($_SESSION['customer'])){
-    header("Location: customer_login.php");
-    exit();
-}
-/* ================= SEND OTP ================= */
-if(isset($_POST['send_otp'])){
+include "db.php";
 
-    $credential = $_POST['credential'];
+$message = "";
 
-    $query = mysqli_query($conn,
-        "SELECT * FROM customers 
-         WHERE email='$credential' 
-         OR phone='$credential'"
-    );
+if(isset($_POST['login'])){
 
-    if(mysqli_num_rows($query) > 0){
+    $name = mysqli_real_escape_string($conn, $_POST['full_name']);
+    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
 
-        $user = mysqli_fetch_assoc($query);
+    // Check if customer already exists
+    $check = "SELECT * FROM customers WHERE phone='$phone'";
+    $result = mysqli_query($conn, $check);
 
-        $otp = rand(100000,999999); // Generate 6 digit OTP
+    if(mysqli_num_rows($result) > 0){
 
-        $_SESSION['otp'] = $otp;
-        $_SESSION['cust_id'] = $user['id'];
-
-        echo "<script>alert('Your OTP is: $otp');</script>"; 
-        // For project demo (In real system send SMS/Email)
-
-        $_SESSION['show_otp'] = true;
-
-    }else{
-        echo "<script>alert('User not found');</script>";
-    }
-}
-
-/* ================= VERIFY OTP ================= */
-if(isset($_POST['verify_otp'])){
-
-    if($_POST['otp'] == $_SESSION['otp']){
-
-        $_SESSION['customer'] = $_SESSION['cust_id'];
+        // Existing customer → Login
+        $row = mysqli_fetch_assoc($result);
+        $_SESSION['customer_id'] = $row['id'];
+        $_SESSION['customer_name'] = $row['full_name'];
+        $_SESSION['customer_phone'] = $row['phone'];
 
         header("Location: customer_dashboard.php");
         exit();
 
-    }else{
-        echo "<script>alert('Invalid OTP');</script>";
+    } else {
+
+        // New customer → Register automatically
+        $insert = "INSERT INTO customers (full_name, phone) 
+                   VALUES ('$name', '$phone')";
+        mysqli_query($conn, $insert);
+
+        $_SESSION['customer_id'] = mysqli_insert_id($conn);
+        $_SESSION['customer_name'] = $name;
+        $_SESSION['customer_phone'] = $phone;
+
+        header("Location: customer_dashboard.php");
+        exit();
     }
 }
 ?>
@@ -55,74 +44,129 @@ if(isset($_POST['verify_otp'])){
 <!DOCTYPE html>
 <html>
 <head>
-<title>Customer Login</title>
+    <title>Customer Login</title>
+	
+ <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
 
-<style>
-body{
-    font-family:Arial;
-    background:linear-gradient(to right,#8b1e2d,#6e1422);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
+        body{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:#f5f6f8;
+            font-family: 'Poppins', sans-serif;
+        }
 
-.login-box{
-    background:white;
-    padding:40px;
-    border-radius:10px;
-    width:350px;
-    text-align:center;
-}
+        .login-container{
+            width: 420px;
+            background:#ffffff;
+            padding:40px;
+            border-radius:16px;
+            box-shadow:0 15px 35px rgba(0,0,0,0.08);
+        }
 
-input{
-    width:100%;
-    padding:10px;
-    margin:10px 0;
-    border-radius:5px;
-    border:1px solid #ccc;
-}
+        .login-container h1{
+            text-align:center;
+            margin-bottom:30px;
+            font-family:'Playfair Display', serif;
+            font-size:36px;
+            font-weight:600;
+            color:#111;
+        }
 
-button{
-    width:100%;
-    padding:10px;
-    background:#8b1e2d;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
+        .input-group{
+            margin-bottom:20px;
+        }
 
-button:hover{
-    background:#6e1422;
-}
-</style>
+        .input-group label{
+            display:block;
+            margin-bottom:8px;
+            font-size:14px;
+            font-weight:500;
+            color:#333;
+        }
+
+        .input-group input{
+            width:100%;
+            padding:14px;
+            border-radius:10px;
+            border:1px solid #e0e0e0;
+            background:#f2f4f7;
+            font-size:14px;
+            outline:none;
+            transition:0.3s;
+        }
+
+        .input-group input:focus{
+            border-color:#8B0000;
+            background:#fff;
+        }
+
+        .login-btn{
+            width:100%;
+            padding:14px;
+            border:none;
+            border-radius:10px;
+            font-size:16px;
+            font-weight:500;
+            cursor:pointer;
+            color:#fff;
+            background:linear-gradient(to right, #5b0000, #8B0000);
+            transition:0.3s;
+        }
+
+        .login-btn:hover{
+            opacity:0.9;
+        }
+
+        .message{
+            text-align:center;
+            color:red;
+            margin-bottom:15px;
+            font-size:14px;
+        }
+
+        @media(max-width:480px){
+            .login-container{
+                width:90%;
+                padding:30px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="login-box">
+<div class="login-container">
 
-<h2>Customer Login</h2>
+    <h1>Customer Login</h1>
 
-<?php if(!isset($_SESSION['show_otp'])){ ?>
+    <?php if(!empty($message)){ ?>
+        <div class="message"><?php echo $message; ?></div>
+    <?php } ?>
 
-<!-- STEP 1: ENTER EMAIL OR PHONE -->
-<form method="POST">
-    <input type="text" name="credential" 
-           placeholder="Enter Email or Phone" required>
-    <button type="submit" name="send_otp">Send OTP</button>
-</form>
+    <form method="POST">
 
-<?php } else { ?>
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" name="full_name" placeholder="Enter your name" required>
+        </div>
 
-<!-- STEP 2: VERIFY OTP -->
-<form method="POST">
-    <input type="text" name="otp" 
-           placeholder="Enter OTP" required>
-    <button type="submit" name="verify_otp">Verify OTP</button>
-</form>
+        <div class="input-group">
+            <label>Phone Number</label>
+            <input type="text" name="phone" placeholder="Enter phone number" required>
+        </div>
 
-<?php } ?>
+        <button type="submit" name="login" class="login-btn">
+            Continue
+        </button>
+
+    </form>
 
 </div>
 
