@@ -146,7 +146,7 @@ body{
 <div class="main">
 
     <div class="topbar">
-        <h1>Welcome, <?php echo $_SESSION['full_name']; ?></h1>
+        <h1>Welcome, <?php echo $_SESSION['name']; ?></h1>
         <form action="logout.php" method="POST">
             <button class="logout">Logout</button>
         </form>

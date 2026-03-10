@@ -6,7 +6,7 @@ $message = "";
 
 if(isset($_POST['login'])){
 
-    $name = mysqli_real_escape_string($conn, $_POST['full_name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
     $phone = mysqli_real_escape_string($conn, $_POST['phone']);
 
     // Check if customer already exists
@@ -18,7 +18,7 @@ if(isset($_POST['login'])){
         // Existing customer → Login
         $row = mysqli_fetch_assoc($result);
         $_SESSION['customer_id'] = $row['id'];
-        $_SESSION['customer_name'] = $row['full_name'];
+        $_SESSION['customer_email'] = $row['email'];
         $_SESSION['customer_phone'] = $row['phone'];
 
         header("Location: customer_dashboard.php");
@@ -27,12 +27,12 @@ if(isset($_POST['login'])){
     } else {
 
         // New customer → Register automatically
-        $insert = "INSERT INTO customers (full_name, phone) 
-                   VALUES ('$name', '$phone')";
+        $insert = "INSERT INTO customers (email, phone) 
+                   VALUES ('$email', '$phone')";
         mysqli_query($conn, $insert);
 
         $_SESSION['customer_id'] = mysqli_insert_id($conn);
-        $_SESSION['customer_name'] = $name;
+        $_SESSION['customer_email'] = $email;
         $_SESSION['customer_phone'] = $phone;
 
         header("Location: customer_dashboard.php");
@@ -153,13 +153,13 @@ if(isset($_POST['login'])){
     <form method="POST">
 
         <div class="input-group">
-            <label>Full Name</label>
-            <input type="text" name="full_name" placeholder="Enter your name" required>
+            <label>Email</label>
+<input type="email" name="email" placeholder="Enter your Gmail" required>
         </div>
 
         <div class="input-group">
             <label>Phone Number</label>
-            <input type="text" name="phone" placeholder="Enter phone number" required>
+            <input type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" required>
         </div>
 
         <button type="submit" name="login" class="login-btn">

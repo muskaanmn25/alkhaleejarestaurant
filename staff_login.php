@@ -1,28 +1,36 @@
 <?php
 session_start();
-$conn = mysqli_connect("localhost", "root", "", "alkhaleej_db");
+include 'db.php';
 
-if(isset($_POST['login'])) {
+if(isset($_POST['login'])){
 
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+$email = $_POST['email'];
+$password = $_POST['password'];
 
-    $query = "SELECT * FROM staff WHERE email='$email' AND password='$password'";
-    $result = mysqli_query($conn, $query);
-    if(mysqli_num_rows($result) > 0){
+$query = "SELECT * FROM staff WHERE email='$email'";
+$result = mysqli_query($conn,$query);
 
-    $row = mysqli_fetch_assoc($result);
+if(mysqli_num_rows($result)==1){
 
-    $_SESSION['staff_id'] = $row['staff_id'];
-    $_SESSION['full_name'] = $row['name'];
-    $_SESSION['role'] = $row['role'];
+$row=mysqli_fetch_assoc($result);
 
-    header("Location: staff_dashboard.php");
-    exit();
+if($password==$row['password']){
+
+$_SESSION['staff_id']=$row['staff_id'];
+$_SESSION['name']=$row['name'];
+
+header("Location: staff_dashboard.php");
+
+}else{
+echo "Incorrect password";
 }
+
+}else{
+echo "Email not found";
+}
+
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>

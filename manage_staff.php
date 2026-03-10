@@ -3,18 +3,31 @@ session_start();
 include "db.php";
 
 /* -------- ADD STAFF -------- */
-
 if(isset($_POST['add_staff'])){
 
-    $name = $_POST['Name'];
+    // Get form values
+    $name = $_POST['name'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
     $salary = $_POST['salary'];
     $role = $_POST['role'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = $_POST['password']; // admin provides plain text password
 
-    mysqli_query($conn,"INSERT INTO staff (Name,email,phone,password,salary,role)
-                        VALUES ('$name','$email','$phone','$password','$salary','$role')");
+    // Validation
+    if(empty($password)){
+        echo "<script>alert('Please enter a password.'); window.history.back();</script>";
+        exit();
+    }
+
+    // Insert into database (plain text password)
+    $sql = "INSERT INTO staff (name, email, phone, salary, role, password) 
+            VALUES ('$name', '$email', '$phone', '$salary', '$role', '$password')";
+
+    if(mysqli_query($conn, $sql)){
+        echo "<script>alert('Staff added successfully!'); window.location='staff_list.php';</script>";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
 }
 
 /* -------- STATUS + DELETE -------- */
@@ -156,7 +169,7 @@ while($row = mysqli_fetch_assoc($result)){
 
         <form method="POST">
             Name:<br>
-            <input type="text" name="Name" required><br><br>
+            <input type="text" name="name" required><br><br>
 
             Email:<br>
             <input type="email" name="email" required><br><br>

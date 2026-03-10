@@ -8,7 +8,10 @@ if(!isset($_SESSION['customer_id'])){
 }
 
 $customer_id = $_SESSION['customer_id'];
-$customer_name = $_SESSION['customer_name'];
+$customer_email = $_SESSION['customer_email'];
+
+// get username from email
+$customer_username = explode("@", $customer_email)[0];
 
 /* ================= GET OR CREATE CART ================= */
 
@@ -225,8 +228,7 @@ th{
 <body>
 
 <div class="header">
-
-<h2>Welcome, <?php echo $customer_name; ?></h2>
+<h2>Welcome <?php echo $customer_username; ?></h2>
 
 <a href="logout.php">Logout</a>
 

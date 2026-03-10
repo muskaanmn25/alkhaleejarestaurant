@@ -1,43 +1,23 @@
 <?php
-session_start();
+include "db.php"; // Database connection
 
-if(!isset($_SESSION['staff_id'])){
-    header("Location: staff_login.php");
-    exit();
+$reservations = mysqli_query($conn, "
+    SELECT r.reservation_id, c.customer_name, r.reservation_date, r.reservation_time, r.guests, r.status 
+    FROM reservations r 
+    JOIN customers c ON r.customer_id = c.customer_id 
+    WHERE r.status='pending'
+");
+
+while($row = mysqli_fetch_assoc($reservations)){
+    echo $row['customer_name']." - ".$row['reservation_date']." ".$row['reservation_time']." - Guests: ".$row['guests'];
+    echo " | <a href='confirm_reservation.php?id=".$row['reservation_id']."&action=confirm'>Confirm</a>";
+    echo " | <a href='confirm_reservation.php?id=".$row['reservation_id']."&action=reject'>Reject</a><br>";
 }
-
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){
-    die("Connection Failed: " . mysqli_connect_error());
-}
-
-/* ===== UPDATE RESERVATION STATUS ONLY ===== */
-if(isset($_POST['update_status'])){
-    $id = $_POST['reservation_id'];
-    $status = $_POST['status'];
-
-    mysqli_query($conn,"UPDATE reservation SET status='$status' WHERE id='$id'");
-    header("Location: staff_reservations.php");
-    exit();
-}
-
-/* ===== DELETE RESERVATION ===== */
-if(isset($_GET['delete'])){
-    $id = $_GET['delete'];
-    mysqli_query($conn,"DELETE FROM reservation WHERE id='$id'");
-    header("Location: staff_reservations.php");
-    exit();
-}
-
-/* ===== FETCH RESERVATIONS ===== */
-$reservations = mysqli_query($conn,"SELECT * FROM reservation ORDER BY id DESC");
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
 <title>Manage Reservations - Staff</title>
-
 <style>
 body{
     font-family: Arial;
@@ -46,10 +26,9 @@ body{
     background:#f4efec;
 }
 
-/* Sidebar */
 .sidebar{
     width:250px;
-    background:#7a1f2b;  /* dark maroon */
+    background:#7a1f2b;
     height:100vh;
     padding:30px 20px;
     color:white;
@@ -70,17 +49,12 @@ body{
 }
 
 .sidebar a:hover{
-    background:#9e2f3d;  /* lighter maroon */
+    background:#9e2f3d;
 }
 
-/* Main */
 .main{
     flex:1;
     padding:30px;
-}
-
-h1{
-    margin-bottom:20px;
 }
 
 table{
@@ -96,7 +70,7 @@ th, td{
 }
 
 th{
-    background:#7a1f2b; /* header dark maroon */
+    background:#7a1f2b;
     color:white;
 }
 
@@ -161,28 +135,24 @@ button:hover{
     <td><?php echo $row['reservation_time']; ?></td>
     <td><?php echo $row['no_of_people']; ?></td>
 
-    <!-- Status column -->
     <td class="status-<?php echo $row['status']; ?>">
         <?php echo ucfirst($row['status']); ?>
     </td>
 
-    <!-- Table number column -->
     <td><?php echo $row['table_number']; ?></td>
 
-    <!-- Update column -->
     <td>
         <form method="POST">
             <input type="hidden" name="reservation_id" value="<?php echo $row['id']; ?>">
             <select name="status">
                 <option value="pending" <?php if($row['status']=='pending') echo 'selected'; ?>>Pending</option>
-                <option value="confirmed" <?php if($row['status']=='confirmed') echo 'selected'; ?>>Confirm</option>
-                <option value="cancelled" <?php if($row['status']=='cancelled') echo 'selected'; ?>>Cancel</option>
+                <option value="confirmed" <?php if($row['status']=='confirmed') echo 'selected'; ?>>Confirmed</option>
+                <option value="cancelled" <?php if($row['status']=='cancelled') echo 'selected'; ?>>Cancelled</option>
             </select>
             <button name="update_status">Update</button>
         </form>
     </td>
 
-    <!-- Delete column -->
     <td>
         <a href="staff_reservations.php?delete=<?php echo $row['id']; ?>">
             <button class="delete">Delete</button>
@@ -194,6 +164,5 @@ button:hover{
 </table>
 
 </div>
-
 </body>
 </html>
