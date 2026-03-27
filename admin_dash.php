@@ -139,6 +139,7 @@ body{
     <a href="manage_staff.php">Manage Staff</a>
     <a href="admin_orders.php">Orders</a>
     <a href="reports.php">Reports</a>
+    <a href="admin_feedback.php">Customer Feedback</a>
 </div>
 
 <!-- Main Content -->

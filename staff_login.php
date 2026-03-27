@@ -2,9 +2,11 @@
 session_start();
 include 'db.php';
 
+$error = "";
+
 if(isset($_POST['login'])){
 
-    $email = trim($_POST['email']);
+    $email = mysqli_real_escape_string($conn, trim($_POST['email']));
     $password = trim($_POST['password']);
 
     $query = "SELECT * FROM staff WHERE LOWER(email)=LOWER('$email')";
@@ -16,95 +18,69 @@ if(isset($_POST['login'])){
 
         if($password == $row['password']){
 
-            $_SESSION['staff_id'] = $row['staff_id'];
-            $_SESSION['name'] = $row['name'];
+            if($row['status'] == 'active') {
+                $_SESSION['staff_id'] = $row['staff_id'];
+                $_SESSION['name'] = $row['name'];
 
-            header("Location: staff_dashboard.php");
-            exit();
+                header("Location: staff_dashboard.php");
+                exit();
+            } else {
+                $error = "Account is inactive. Please contact admin.";
+            }
 
         } else {
-            echo "Incorrect password";
+            $error = "Incorrect password";
         }
 
     } else {
-        echo "Email not found";
+        $error = "Email not found";
     }
 }
 ?>
 <!DOCTYPE html>
 <html>
 <head>
-<title>Staff Login</title>
-
+<title>Staff Login - Al-Khaleej</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background-color: #f3f1ef;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.box {
-    background: white;
-    padding: 30px;
-    width: 320px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-h2 {
-    text-align: center;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background: #7c1f2a;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #5c1520;
-}
-
-.error {
-    color: red;
-    text-align: center;
-}
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    body{ height:100vh; display:flex; justify-content:center; align-items:center; background:#f5f6f8; font-family: 'Poppins', sans-serif; }
+    .login-container{ width: 420px; background:#ffffff; padding:40px; border-radius:16px; box-shadow:0 15px 35px rgba(0,0,0,0.08); }
+    .login-container h1{ text-align:center; margin-bottom:30px; font-family:'Playfair Display', serif; font-size:36px; font-weight:600; color:#111; line-height:1.2; }
+    .input-group{ margin-bottom:20px; }
+    .input-group label{ display:block; margin-bottom:8px; font-size:14px; font-weight:500; color:#333; }
+    .input-group input{ width:100%; padding:14px; border-radius:10px; border:1px solid #e0e0e0; background:#f2f4f7; font-size:14px; outline:none; transition:0.3s; font-family:inherit;}
+    .input-group input:focus{ border-color:#8B0000; background:#fff; }
+    .login-btn{ width:100%; padding:14px; border:none; border-radius:10px; font-size:16px; font-weight:500; cursor:pointer; color:#fff; background:linear-gradient(to right, #5b0000, #8B0000); transition:0.3s; font-family:inherit;}
+    .login-btn:hover{ opacity:0.9; transform:translateY(-2px); box-shadow:0 5px 15px rgba(139,0,0,0.3); }
+    .error{ text-align:center; color:#d93025; background:#fce8e6; padding:10px; border-radius:8px; margin-bottom:20px; font-size:14px; }
+    @media(max-width:480px){ .login-container{ width:90%; padding:30px; } }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-    <h2>AL khaleej<br>Staff Login</h2>
+<div class="login-container">
+    <h1>Al-Khaleej<br><span style="font-size:24px; color:#555;">Staff Portal</span></h1>
 
-    <?php if(isset($error)) echo "<div class='error'>$error</div>"; ?>
+    <?php if(!empty($error)){ ?>
+        <div class="error"><?php echo $error; ?></div>
+    <?php } ?>
 
     <form method="POST">
-        <input type="email" name="email" placeholder="Enter Email" required>
-        <input type="password" name="password" id="password" placeholder="Enter Password" required>
-        <button type="submit" name="login">Sign In</button>
+        <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter your password" required>
+        </div>
+
+        <button type="submit" name="login" class="login-btn">Sign In</button>
     </form>
 </div>
-
-<script>
-/* Simple show password toggle */
-</script>
 
 </body>
 </html>

@@ -1,10 +1,7 @@
 <?php
 session_start();
 $conn = mysqli_connect("localhost","root","","alkhaleej_db");
-
-if(!$conn){
-    die("Connection Failed: " . mysqli_connect_error());
-}
+if(!$conn){ die("Connection Failed: " . mysqli_connect_error()); }
 
 if(!isset($_SESSION['customer_id'])){
     header("Location: customer_login.php");
@@ -44,115 +41,63 @@ if(isset($_POST['add_to_cart'])){
     header("Location: customer_dashboard.php");
     exit();
 }
-
-/* ===== REMOVE/UPDATE QTY ===== */
-if(isset($_GET['remove'])){
-    $id = intval($_GET['remove']);
-    mysqli_query($conn,"DELETE FROM cart_items WHERE items_id='$id' AND cart_id='$cart_id'");
-    header("Location: customer_dashboard.php?view=cart");
-    exit();
-}
-
-if(isset($_GET['inc'])){
-    $id = intval($_GET['inc']);
-    mysqli_query($conn,"UPDATE cart_items SET quantity=quantity+1 WHERE items_id='$id' AND cart_id='$cart_id'");
-    header("Location: customer_dashboard.php?view=cart");
-    exit();
-}
-
-if(isset($_GET['dec'])){
-    $id = intval($_GET['dec']);
-    $q = mysqli_query($conn,"SELECT quantity FROM cart_items WHERE items_id='$id'");
-    $d = mysqli_fetch_assoc($q);
-    if($d['quantity'] > 1){
-        mysqli_query($conn,"UPDATE cart_items SET quantity=quantity-1 WHERE items_id='$id'");
-    }
-    header("Location: customer_dashboard.php?view=cart");
-    exit();
-}
-
-/* ===== PLACE ORDER ===== */
-if(isset($_POST['place_order'])){
-
-    // Fetch all cart items
-    $cart_items_res = mysqli_query($conn,"
-        SELECT ci.*, m.price 
-        FROM cart_items ci
-        JOIN menu m ON ci.menu_id = m.menu_id
-        WHERE ci.cart_id='$cart_id'
-    ");
-
-    if(mysqli_num_rows($cart_items_res) == 0){
-        echo "<script>alert('Your cart is empty!');</script>";
-    } else {
-        $total = 0;
-        $cart_items = [];
-        while($row = mysqli_fetch_assoc($cart_items_res)){
-            $row['total_price'] = $row['quantity'] * $row['price'];
-            $total += $row['total_price'];
-            $cart_items[] = $row;
-        }
-
-        $order_date = date('Y-m-d H:i:s');
-        $order_type = 'Delivery'; // or 'Dine-in'
-        $status = 'pending';
-
-        // Insert into orders table
-        $order_query = mysqli_query($conn,"
-            INSERT INTO orders (customer_id, order_date, order_type, total_amount, status)
-            VALUES ('$customer_id', '$order_date', '$order_type', '$total', '$status')
-        ");
-
-        if($order_query){
-            $order_id = mysqli_insert_id($conn);
-
-            // Insert into order_items
-            foreach($cart_items as $item){
-                mysqli_query($conn,"
-                    INSERT INTO order_items (order_id, menu_id, quantity, price)
-                    VALUES ('$order_id', '{$item['menu_id']}', '{$item['quantity']}', '{$item['price']}')
-                ");
-            }
-
-            // Clear cart items AND cart
-            mysqli_query($conn,"DELETE ci, c FROM cart c LEFT JOIN cart_items ci ON ci.cart_id=c.cart_id WHERE c.cart_id='$cart_id'");
-
-            // Reset floating cart counter
-            $cart_count = 0;
-
-            // Redirect to payment page
-            header("Location: payment.php?order_id=$order_id");
-            exit();
-        } else {
-            echo "<script>alert('Failed to place order: ".mysqli_error($conn)."');</script>";
-        }
-    }
-}
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>Dashboard - Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-body{font-family:Arial;margin:0;background:#f4f4f4;}
-.header{background:#7a1f2b;color:white;padding:15px;display:flex;justify-content:space-between;}
-.tabs{display:flex;gap:10px;padding:15px;}
-.tab-btn{padding:10px 20px;border:none;border-radius:20px;background:#ddd;cursor:pointer;}
-.tab-btn.active{background:#7a1f2b;color:white;}
-.menu-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:20px;}
-.menu-card{background:white;padding:15px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.2);}
-.menu-price{float:right;color:#7a1f2b;font-weight:bold;}
-.add-btn{width:100%;margin-top:10px;padding:8px;background:#7a1f2b;color:white;border:none;border-radius:5px;}
-.qty-box{display:flex;justify-content:center;gap:10px;margin-top:10px;}
-.qty-box button{width:30px;height:30px;background:#7a1f2b;color:white;border:none;border-radius:5px;}
-.qty-box input{width:40px;text-align:center;}
-.cart-section{padding:20px;}
-table{width:100%;background:white;border-radius:10px;overflow:hidden;}
-th,td{padding:10px;text-align:center;}
-th{background:#7a1f2b;color:white;}
-.action-btn{color:#7a1f2b;text-decoration:none;font-weight:bold;}
-.floating-cart{position:fixed;bottom:20px;right:20px;background:#7a1f2b;color:white;padding:12px 18px;border-radius:50px;cursor:pointer;font-weight:bold;box-shadow:0 4px 10px rgba(0,0,0,0.3);}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body { background:#f4efec; color:#333; }
+
+/* NAVBAR */
+.navbar { background:#7a1f2b; padding:15px 40px; display:flex; justify-content:space-between; align-items:center; color:white; box-shadow:0 4px 10px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100; }
+.navbar h1 { font-family:'Playfair Display', serif; font-size:24px; }
+.navbar .nav-links a { color:white; text-decoration:none; margin-left:20px; font-weight:500; transition:0.3s; }
+.navbar .nav-links a:hover { color:#ffcccc; }
+
+/* HERO BANNERS */
+.hero { background:linear-gradient(rgba(122,31,43,0.8), rgba(122,31,43,0.8)), url('https://images.unsplash.com/photo-1544025162-811114bd4131?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover; padding:60px 40px; text-align:center; color:white; margin-bottom:40px; }
+.hero h2 { font-family:'Playfair Display', serif; font-size:42px; margin-bottom:10px; }
+.hero p { font-size:18px; font-weight:300; }
+
+/* CATEGORY TABS */
+.tabs-container { display:flex; justify-content:center; gap:15px; margin-bottom:40px; flex-wrap:wrap; padding:0 20px;}
+.tab-btn { padding:12px 25px; border:none; border-radius:30px; background:white; color:#555; font-size:16px; font-weight:500; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.05); transition:0.3s; }
+.tab-btn:hover { transform:translateY(-2px); box-shadow:0 6px 15px rgba(0,0,0,0.1); }
+.tab-btn.active { background:#7a1f2b; color:white; }
+
+/* MENU GRID */
+.menu-section { max-width:1200px; margin:0 auto; padding:0 20px 80px; }
+.menu-container { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:30px; }
+.menu-card { background:white; border-radius:15px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.05); transition:0.3s; display:flex; flex-direction:column; }
+.menu-card:hover { transform:translateY(-8px); box-shadow:0 12px 25px rgba(0,0,0,0.1); }
+.menu-img { width:100%; height:200px; object-fit:cover; background:#f4f4f4; }
+.menu-content { padding:20px; display:flex; flex-direction:column; flex:1; }
+.menu-title-row { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+.menu-title { font-family:'Playfair Display', serif; font-size:20px; font-weight:600; color:#111; }
+.menu-price { font-size:18px; font-weight:600; color:#7a1f2b; }
+.menu-desc { font-size:14px; color:#777; margin-bottom:20px; flex:1; }
+
+.add-cart-form { display:flex; flex-direction:column; gap:15px; margin-top:auto;}
+.qty-control { display:flex; align-items:center; justify-content:space-between; background:#f9f9f9; border-radius:8px; padding:5px 10px; border:1px solid #eee; }
+.qty-btn { width:32px; height:32px; background:white; border:1px solid #ddd; border-radius:5px; cursor:pointer; font-weight:bold; color:#555; transition:0.2s;}
+.qty-btn:hover { background:#7a1f2b; color:white; border-color:#7a1f2b; }
+.qty-input { width:40px; text-align:center; border:none; background:transparent; font-weight:500; font-size:16px; outline:none; }
+.add-btn { width:100%; background:#7a1f2b; color:white; border:none; padding:12px; border-radius:8px; font-size:15px; font-weight:500; cursor:pointer; transition:0.3s; }
+.add-btn:hover { background:#5c1520; }
+
+/* FLOATING CART */
+.floating-cart { position:fixed; bottom:30px; right:30px; background:#111; color:white; padding:15px 25px; border-radius:50px; text-decoration:none; font-weight:600; display:flex; align-items:center; gap:10px; box-shadow:0 10px 25px rgba(0,0,0,0.3); transition:0.3s; z-index:100; }
+.floating-cart:hover { transform:scale(1.05); background:#7a1f2b; }
+.cart-badge { background:white; color:#7a1f2b; width:26px; height:26px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:14px; font-weight:bold; }
+
+@media(max-width:768px){
+    .navbar { padding:15px 20px; }
+    .hero { padding:40px 20px; }
+    .hero h2 { font-size:32px; }
+}
 </style>
 <script>
 function showCategory(id,btn){
@@ -161,131 +106,95 @@ function showCategory(id,btn){
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
 }
-function showCart(){
-    document.getElementById('menuSection').style.display='none';
-    document.getElementById('cartSection').style.display='block';
-}
-function showMenu(){
-    document.getElementById('cartSection').style.display='none';
-    document.getElementById('menuSection').style.display='block';
-}
 function increaseQty(btn){let i=btn.parentElement.querySelector("input"); i.value=parseInt(i.value)+1;}
 function decreaseQty(btn){let i=btn.parentElement.querySelector("input"); if(i.value>1) i.value=parseInt(i.value)-1;}
-window.onload = function(){const params = new URLSearchParams(window.location.search); if(params.get('view') === 'cart'){showCart();}}
 </script>
 </head>
 <body>
 
-<div class="header">
-<h3>Welcome <?php echo $customer_username;?></h3>
-<a href="logout.php" style="color:white;">Logout</a>
+<div class="navbar">
+    <h1>Al-Khaleej</h1>
+    <div class="nav-links">
+        <a href="customer_dashboard.php">Menu</a>
+        <a href="track_reservation.php">Reservations</a>
+        <a href="logout.php">Logout</a>
+    </div>
 </div>
 
-<!-- MENU -->
-<div id="menuSection">
-<h2 style="padding-left:20px;">Menu</h2>
+<div class="hero">
+    <h2>Welcome, <?php echo ucfirst($customer_username); ?></h2>
+    <p>Discover the authentic taste of Arabian cuisine</p>
+</div>
+
+<!-- MENU SECTION -->
+<div class="menu-section">
 
 <?php
 $cat_query=mysqli_query($conn,"SELECT DISTINCT category FROM menu WHERE status='available'");
 $i=0;
 ?>
-<div class="tabs">
+<div class="tabs-container">
 <?php while($cat=mysqli_fetch_assoc($cat_query)){ 
 $cat_id=str_replace(' ','_',$cat['category']); ?>
-<button class="tab-btn <?php if($i==0) echo 'active';?>" onclick="showCategory('<?php echo $cat_id;?>',this)">
-<?php echo $cat['category'];?>
-</button>
+    <button class="tab-btn <?php if($i==0) echo 'active';?>" onclick="showCategory('<?php echo $cat_id;?>',this)">
+        <?php echo ucfirst($cat['category']);?>
+    </button>
 <?php $i++; } ?>
 </div>
 
-<?php mysqli_data_seek($cat_query,0); $i=0;
+<?php 
+mysqli_data_seek($cat_query,0); 
+$i=0;
 while($cat=mysqli_fetch_assoc($cat_query)){
-$cat_id=str_replace(' ','_',$cat['category']); ?>
-<div id="<?php echo $cat_id;?>" class="category-box" style="display:<?php echo ($i==0)?'block':'none'; ?>">
-
-<div class="menu-container">
-<?php
-$q=mysqli_query($conn,"SELECT * FROM menu WHERE category='".$cat['category']."' AND status='available'");
-while($m=mysqli_fetch_assoc($q)){ ?>
-<div class="menu-card">
-<b><?php echo $m['item_name'];?></b>
-<span class="menu-price">₹<?php echo $m['price'];?></span>
-
-<form method="POST">
-<input type="hidden" name="menu_id" value="<?php echo $m['menu_id'];?>">
-
-<div class="qty-box">
-<button type="button" onclick="decreaseQty(this)">-</button>
-<input type="number" name="quantity" value="1">
-<button type="button" onclick="increaseQty(this)">+</button>
-</div>
-
-<button name="add_to_cart" class="add-btn">Add to Cart</button>
-</form>
-</div>
-<?php } ?>
-</div>
-</div>
+    $cat_id=str_replace(' ','_',$cat['category']); 
+?>
+    <div id="<?php echo $cat_id;?>" class="category-box" style="display:<?php echo ($i==0)?'block':'none'; ?>">
+        <div class="menu-container">
+        <?php
+        $q=mysqli_query($conn,"SELECT * FROM menu WHERE category='".$cat['category']."' AND status='available'");
+        while($m=mysqli_fetch_assoc($q)){ 
+        ?>
+            <div class="menu-card">
+                <?php if(!empty($m['image'])) { ?>
+                    <img src="uploads/<?php echo $m['image']; ?>" class="menu-img" alt="<?php echo $m['item_name']; ?>">
+                <?php } else { ?>
+                    <!-- Placeholder if no image -->
+                    <div class="menu-img" style="display:flex; justify-content:center; align-items:center; background:#eee; color:#aaa; font-size:40px;">🍽️</div>
+                <?php } ?>
+                
+                <div class="menu-content">
+                    <div class="menu-title-row">
+                        <span class="menu-title"><?php echo $m['item_name'];?></span>
+                        <span class="menu-price">₹<?php echo $m['price'];?></span>
+                    </div>
+                    
+                    <div class="menu-desc"><?php echo rtrim(!empty($m['description']) ? $m['description'] : "Delicious authentic ".$m['item_name'], "."); ?>.</div>
+                    
+                    <form method="POST" class="add-cart-form">
+                        <input type="hidden" name="menu_id" value="<?php echo $m['menu_id'];?>">
+                        <div class="qty-control">
+                            <span style="font-size:14px; color:#777; font-weight:500;">Quantity</span>
+                            <div>
+                                <button type="button" class="qty-btn" onclick="decreaseQty(this)">-</button>
+                                <input type="number" class="qty-input" name="quantity" value="1" readonly>
+                                <button type="button" class="qty-btn" onclick="increaseQty(this)">+</button>
+                            </div>
+                        </div>
+                        <button name="add_to_cart" class="add-btn">Add to Cart</button>
+                    </form>
+                </div>
+            </div>
+        <?php } ?>
+        </div>
+    </div>
 <?php $i++; } ?>
 </div>
 
-<!-- CART -->
-<div id="cartSection" style="display:none;" class="cart-section">
-
-<div style="display:flex;justify-content:space-between;">
-<h2>Your Cart</h2>
-<button onclick="showMenu()">← Back</button>
-</div>
-
-<table>
-<tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th></tr>
-
-<?php
-$total=0;
-$q=mysqli_query($conn,"SELECT ci.*,m.item_name,m.price FROM cart_items ci JOIN menu m ON ci.menu_id=m.menu_id WHERE ci.cart_id='$cart_id'");
-while($item=mysqli_fetch_assoc($q)){
-$t=$item['price']*$item['quantity'];
-$total+=$t;
-?>
-
-<tr>
-<td><?php echo $item['item_name'];?></td>
-<td>₹<?php echo $item['price'];?></td>
-<td>
-<a href="?dec=<?php echo $item['items_id'];?>&view=cart">➖</a>
-<?php echo $item['quantity'];?>
-<a href="?inc=<?php echo $item['items_id'];?>&view=cart">➕</a>
-</td>
-<td>₹<?php echo $t;?></td>
-<td><a class="action-btn" href="?remove=<?php echo $item['items_id'];?>&view=cart">Remove</a></td>
-</tr>
-
-<?php } ?>
-
-<tr>
-<td colspan="3">Total</td>
-<td colspan="2">₹<?php echo $total;?></td>
-</tr>
-
-</table>
-
-<form method="POST">
-<button name="place_order">Place Order</button>
-</form>
-
-</div>
-
-<!-- FLOAT -->
-<div class="floating-cart" onclick="showCart()">
-🛒 <span id="cartCounter"><?php echo $cart_count;?></span>
-</div>
-
-<script>
-// Update floating cart counter dynamically after order
-<?php if(isset($_POST['place_order']) && $cart_count==0){ ?>
-document.getElementById('cartCounter').textContent = '0';
-<?php } ?>
-</script>
+<!-- FLOATING CART -->
+<a href="cart.php" class="floating-cart">
+    <span>🛒 View Cart</span> 
+    <div class="cart-badge" id="cartCounter"><?php echo $cart_count;?></div>
+</a>
 
 </body>
 </html>
