@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("db.php");
+include "db.php";
 
 // Get today's orders
 $query = "SELECT orders.*, users.full_name AS customer_name

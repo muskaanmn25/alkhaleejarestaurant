@@ -7,27 +7,33 @@ if(!isset($_SESSION['staff_id'])){
 }
 
 $conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){ die("Connection Failed: " . mysqli_connect_error()); }
+if(!$conn){ 
+    die("Connection Failed: " . mysqli_connect_error()); 
+}
 
 /* ===== UPDATE ORDER STATUS ===== */
 if(isset($_POST['update_status'])){
     $order_id = $_POST['order_id'];
     $status = $_POST['status'];
+
     mysqli_query($conn,"UPDATE orders SET status='$status' WHERE id='$order_id'");
+    
     header("Location: staff_orders.php");
     exit();
 }
 
 /* ===== DELETE ORDER ===== */
 if(isset($_GET['delete'])){
-    $id = $_GET['delete'];
-    mysqli_query($conn,"DELETE FROM orders WHERE id='$id'");
+    $order_id = $_GET['delete'];
+
+    mysqli_query($conn,"DELETE FROM orders WHERE id='$order_id'");
+    
     header("Location: staff_orders.php");
     exit();
 }
 
 /* ===== FETCH ORDERS ===== */
-$orders = mysqli_query($conn,"SELECT * FROM orders ORDER BY id DESC");
+$orders = mysqli_query($conn,"SELECT * FROM orders ORDER BY order_id DESC");
 ?>
 
 <!DOCTYPE html>

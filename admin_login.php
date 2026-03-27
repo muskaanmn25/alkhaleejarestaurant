@@ -6,14 +6,12 @@ $msg = "";
 
 if(isset($_POST['login'])){
 
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
 
     $query = "SELECT * FROM users 
               WHERE email='$email' 
-              AND password='$password' 
-              AND role='admin'
-              AND status='active'";
+              AND password='$password'";
 
     $result = mysqli_query($conn, $query);
 
@@ -21,19 +19,19 @@ if(isset($_POST['login'])){
 
         $row = mysqli_fetch_assoc($result);
 
-        $_SESSION['id'] = $row['id'];
+        // ✅ Set session
+        $_SESSION['admin_id'] = $row['admin_id'];
         $_SESSION['full_name'] = $row['full_name'];
-        $_SESSION['role'] = $row['role'];
 
+        // ✅ Redirect
         header("Location: admin_dash.php");
         exit();
 
     } else {
-        $msg = "Invalid Admin Email or Password!";
+        $msg = "Invalid Email or Password!";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>

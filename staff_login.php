@@ -4,31 +4,31 @@ include 'db.php';
 
 if(isset($_POST['login'])){
 
-$email = $_POST['email'];
-$password = $_POST['password'];
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
 
-$query = "SELECT * FROM staff WHERE email='$email'";
-$result = mysqli_query($conn,$query);
+    $query = "SELECT * FROM staff WHERE LOWER(email)=LOWER('$email')";
+    $result = mysqli_query($conn,$query);
 
-if(mysqli_num_rows($result)==1){
+    if(mysqli_num_rows($result) == 1){
 
-$row=mysqli_fetch_assoc($result);
+        $row = mysqli_fetch_assoc($result);
 
-if($password==$row['password']){
+        if($password == $row['password']){
 
-$_SESSION['staff_id']=$row['staff_id'];
-$_SESSION['name']=$row['name'];
+            $_SESSION['staff_id'] = $row['staff_id'];
+            $_SESSION['name'] = $row['name'];
 
-header("Location: staff_dashboard.php");
+            header("Location: staff_dashboard.php");
+            exit();
 
-}else{
-echo "Incorrect password";
-}
+        } else {
+            echo "Incorrect password";
+        }
 
-}else{
-echo "Email not found";
-}
-
+    } else {
+        echo "Email not found";
+    }
 }
 ?>
 <!DOCTYPE html>

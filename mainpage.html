@@ -1,326 +1,301 @@
-<?php
-session_start();
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-
-if(!$conn){
-    die("Connection Failed: " . mysqli_connect_error());
-}
-
-if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reserve']))
-{
-    if(!isset($_SESSION['customer_id'])){
-        die("Customer ID not found in session");
-    }
-
-    $customer_id = $_SESSION['customer_id'];
-    $phone = $_POST['phone'];
-    $guests = $_POST['guests'];
-    $date   = $_POST['date'];
-    $time   = $_POST['time'];
-
-    $sql = "INSERT INTO reservation
-            (customer_id, phone, no_of_people, reservation_date, reservation_time, status)
-            VALUES
-            ('$customer_id','$phone','$guests','$date','$time','pending')";
-
-    if(mysqli_query($conn,$sql)){
-        die("INSERT SUCCESS");
-    } else {
-        die("DATABASE ERROR: " . mysqli_error($conn));
-    }
-}?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Al-Khaleej Arabian Restaurant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Khaleej Arabian Restaurant</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap"
+        rel="stylesheet">
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins', sans-serif;
-}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
 
-body{
-background:#f8f5f2;
-color:#333;
-}
+        body {
+            background: #f8f5f2;
+            color: #333;
+        }
 
-/* NAVBAR */
-nav{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:18px 80px;
-background:rgba(255,255,255,0.95);
-position:fixed;
-width:100%;
-top:0;
-z-index:1000;
-}
+        /* NAVBAR */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 80px;
+            background: rgba(255, 255, 255, 0.95);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
 
-.logo{
-font-family:'Playfair Display', serif;
-font-size:24px;
-font-weight:700;
-color:#7a2c2c;
-}
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #7a2c2c;
+        }
 
-.nav-links a{
-text-decoration:none;
-margin:0 20px;
-color:#444;
-font-weight:500;
-}
+        .nav-links a {
+            text-decoration: none;
+            margin: 0 20px;
+            color: #444;
+            font-weight: 500;
+        }
 
 
 
-/* HERO */
-.hero{
-height:100vh;
-background:url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-position:relative;
-padding:20px;
-}
+        /* HERO */
+        .hero {
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 20px;
+        }
 
-.hero::after{
-content:"";
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(255,255,255,0.8));
-}
+        .hero::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.8));
+        }
 
-.hero-content{
-position:relative;
-z-index:2;
-color:white;
-max-width:700px;
-}
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            color: white;
+            max-width: 700px;
+        }
 
-.hero-content h4{
-letter-spacing:4px;
-font-size:14px;
-margin-bottom:15px;
-color:#d4af37;
-}
+        .hero-content h4 {
+            letter-spacing: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #d4af37;
+        }
 
-.hero-content h1{
-font-family:'Playfair Display', serif;
-font-size:60px;
-margin-bottom:20px;
-}
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
 
-.hero-content p{
-font-size:18px;
-margin-bottom:30px;
-}
+        .hero-content p {
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
 
-.hero-btn{
-padding:12px 30px;
-background:#d4af37;
-border:none;
-border-radius:8px;
-font-weight:500;
-cursor:pointer;
-margin:5px;
-}
+        .hero-btn {
+            padding: 12px 30px;
+            background: #d4af37;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 5px;
+        }
 
-/* PORTAL */
-.portal{
-padding:100px 60px;
-text-align:center;
-background:#f8f5f2;
-}
+        /* PORTAL */
+        .portal {
+            padding: 100px 60px;
+            text-align: center;
+            background: #f8f5f2;
+        }
 
-.portal h2{
-font-family:'Playfair Display', serif;
-font-size:38px;
-margin-bottom:10px;
-}
+        .portal h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
 
-.portal p{
-color:#777;
-margin-bottom:50px;
-}
+        .portal p {
+            color: #777;
+            margin-bottom: 50px;
+        }
 
-.cards{
-display:flex;
-justify-content:center;
-gap:40px;
-flex-wrap:wrap;
-}
+        .cards {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
 
-.card{
-background:white;
-padding:40px 30px;
-width:300px;
-border-radius:15px;
-box-shadow:0 10px 25px rgba(0,0,0,0.05);
-transition:0.3s;
-}
+        .card {
+            background: white;
+            padding: 40px 30px;
+            width: 300px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
+        }
 
-.card:hover{
-transform:translateY(-8px);
-}
+        .card:hover {
+            transform: translateY(-8px);
+        }
 
-.card h3{
-font-family:'Playfair Display', serif;
-margin:20px 0 10px;
-}
+        .card h3 {
+            font-family: 'Playfair Display', serif;
+            margin: 20px 0 10px;
+        }
 
-.card p{
-color:#777;
-font-size:14px;
-}
+        .card p {
+            color: #777;
+            font-size: 14px;
+        }
 
-/* FOOTER */
-footer{
-background:#fff;
-padding:20px;
-text-align:center;
-font-size:14px;
-color:#777;
-}
+        /* FOOTER */
+        footer {
+            background: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+        }
 
-/* POPUP FORM */
-.popup{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-justify-content:center;
-align-items:center;
-z-index:2000;
-}
+        /* POPUP FORM */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
 
-.popup-content{
-background:white;
-padding:30px;
-border-radius:10px;
-width:350px;
-text-align:center;
-}
+        .popup-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+        }
 
-.popup-content input{
-width:100%;
-padding:10px;
-margin:8px 0;
-border:1px solid #ccc;
-border-radius:5px;
-}
+        .popup-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-.popup-content button{
-width:100%;
-padding:12px;
-background:#d4af37;
-border:none;
-color:white;
-border-radius:5px;
-cursor:pointer;
-}
+        .popup-content button {
+            width: 100%;
+            padding: 12px;
+            background: #d4af37;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-.close{
-float:right;
-font-size:22px;
-cursor:pointer;
-}
-</style>
+        .close {
+            float: right;
+            font-size: 22px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<nav>
-<div class="logo">Al-Khaleej Arabian Restaurant</div>
-<div class="nav-links">
-<a href="#">Feedback</a>
-</div>
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">Al-Khaleej Arabian Restaurant</div>
+        <div class="nav-links">
+      
+            <a href="track_reservation.php" style="color:#d4af37; font-weight:bold;">Track Booking</a>
+            <a href="#">Feedback</a>
+        </div>
 
-</nav>
+    </nav>
 
-<!-- HERO -->
-<section class="hero">
-<div class="hero-content">
-<h4>ARABIAN DINING</h4>
-<h1>Al-Khaleej</h1>
-<p>Experience authentic Arabian flavors in an atmosphere of luxury and tradition.</p>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <h4>ARABIAN DINING</h4>
+            <h1>Al-Khaleej</h1>
+            <p>Experience authentic Arabian flavors in an atmosphere of luxury and tradition.</p>
 
-<button class="hero-btn">View Our Menu</button>
-<button class="hero-btn" onclick="openForm()">Reserve a Table</button>
+            <button class="hero-btn">View Our Menu</button>
+            <button class="hero-btn" onclick="openForm()">Reserve a Table</button>
 
-</div>
-</section>
+        </div>
+    </section>
 
-<!-- PORTAL -->
-<section class="portal">
-<h2>Access Your Portal</h2>
-<p>Choose your role to access the right dashboard</p>
+    <!-- PORTAL -->
+    <section class="portal">
+        <h2>Access Your Portal</h2>
+        <p>Choose your role to access the right dashboard</p>
 
-<div class="cards">
+        <div class="cards">
 
-<div class="card" onclick="window.location.href='customer_login.php'" style="cursor:pointer;">
-<h3>Customer</h3>
-<p>Browse menu, order food, and share feedback.</p>
-</div>
+            <div class="card" onclick="window.location.href='customer_login.php'" style="cursor:pointer;">
+                <h3>Customer</h3>
+                <p>Browse menu, order food, and share feedback.</p>
+            </div>
 
-<div class="card" onclick="window.location.href='staff_login.php'" style="cursor:pointer;">
-<h3>Staff</h3>
-<p>Manage orders, reservations, and service operations.</p>
-</div>
+            <div class="card" onclick="window.location.href='staff_login.php'" style="cursor:pointer;">
+                <h3>Staff</h3>
+                <p>Manage orders, reservations, and service operations.</p>
+            </div>
 
-<div class="card" onclick="window.location.href='admin_login.php'" style="cursor:pointer;">
-<h3>Admin</h3>
-<p>Full control over menu, staff, and reports.</p>
-</div>
+            <div class="card" onclick="window.location.href='admin_login.php'" style="cursor:pointer;">
+                <h3>Admin</h3>
+                <p>Full control over menu, staff, and reports.</p>
+            </div>
 
-</div>
-</section>
+        </div>
+    </section>
 
-<!-- FOOTER -->
-<footer>
-Al-Khaleej Arabian Restaurant.
-</footer>
+    <!-- FOOTER -->
+    <footer>
+        Al-Khaleej Arabian Restaurant.
+    </footer>
 
-<!-- RESERVATION POPUP -->
-<div id="reserveForm" class="popup">
-<div class="popup-content">
-<span class="close" onclick="closeForm()">&times;</span>
+    <!-- RESERVATION POPUP -->
+    <div id="reserveForm" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closeForm()">&times;</span>
 
-<h2>Reserve a Table</h2>
+            <h2>Reserve a Table</h2>
 
-<form action="reservation_submit.php" method="POST">
-    Name: <input type="text" name="customer_name" required><br>
-    Phone: <input type="text" name="phone" required pattern="\d{10}"><br>
-    Email: <input type="email" name="email"><br>
-    Date: <input type="date" name="reservation_date" required><br>
-    Time: <input type="time" name="reservation_time" required><br>
-    Guests: <input type="number" name="guests" min="1" required><br>
-    <button type="submit" name="reserve">Reserve</button>
-</form>
-<script>
-function openForm(){
-document.getElementById("reserveForm").style.display="flex";
-}
+            <form action="reservation_submit.php" method="POST">
+                Name: <input type="text" name="customer_name" required><br>
+                Phone: <input type="text" name="phone" required pattern="\d{10}"><br>
+                Email: <input type="email" name="email"><br>
+                Date: <input type="date" name="reservation_date" required><br>
+                Time: <input type="time" name="reservation_time" required><br>
+                Guests: <input type="number" name="guests" min="1" required><br>
+                <button type="submit" name="reserve">Reserve</button>
+            </form>
+            <script>
+                function openForm() {
+                    document.getElementById("reserveForm").style.display = "flex";
+                }
 
-function closeForm(){
-document.getElementById("reserveForm").style.display="none";
-}
-</script>
+                function closeForm() {
+                    document.getElementById("reserveForm").style.display = "none";
+                }
+            </script>
 
 </body>
+
 </html>

@@ -1,22 +1,27 @@
 <?php
 session_start();
 
+// 🔐 Protect page
 if(!isset($_SESSION['staff_id'])){
     header("Location: staff_login.php");
     exit();
 }
 
+// DB connection
 $conn = mysqli_connect("localhost","root","","alkhaleej_db");
 
 if(!$conn){
     die("Connection Failed: " . mysqli_connect_error());
 }
 
-// Get counts
-$totalOrders = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM orders"))['total'];
-$pendingOrders = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM orders WHERE status='pending'"))['total'];
-$totalReservations = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM reservation"))['total'];
-$pendingReservations = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM reservation WHERE status='pending'"))['total'];
+// ✅ Get counts safely
+$totalOrders = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM orders"))['total'] ?? 0;
+
+$pendingOrders = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM orders WHERE status='pending'"))['total'] ?? 0;
+
+$totalReservations = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM reservation"))['total'] ?? 0;
+
+$pendingReservations = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM reservation WHERE status='pending'"))['total'] ?? 0;
 ?>
 <!DOCTYPE html>
 <html>

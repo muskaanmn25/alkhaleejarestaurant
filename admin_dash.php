@@ -1,13 +1,20 @@
 <?php
 session_start();
+include "db.php";
 
-// Protect page
-if(!isset($_SESSION['role']) || $_SESSION['role'] != "admin"){
+// 🔐 Protect page (VERY IMPORTANT)
+if(!isset($_SESSION['admin_id'])){
     header("Location: admin_login.php");
     exit();
 }
-?>
 
+// Get admin details (optional but good)
+$admin_id = $_SESSION['admin_id'];
+
+$query = "SELECT * FROM users WHERE admin_id='$admin_id'";
+$result = mysqli_query($conn, $query);
+$row = mysqli_fetch_assoc($result);
+?>
 <!DOCTYPE html>
 <html>
 <head>

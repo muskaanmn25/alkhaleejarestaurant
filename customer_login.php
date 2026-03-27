@@ -17,7 +17,7 @@ if(isset($_POST['login'])){
 
         // Existing customer → Login
         $row = mysqli_fetch_assoc($result);
-        $_SESSION['customer_id'] = $row['id'];
+        $_SESSION['customer_id'] = $row['customer_id'];
         $_SESSION['customer_email'] = $row['email'];
         $_SESSION['customer_phone'] = $row['phone'];
 
@@ -27,8 +27,8 @@ if(isset($_POST['login'])){
     } else {
 
         // New customer → Register automatically
-        $insert = "INSERT INTO customers (email, phone) 
-                   VALUES ('$email', '$phone')";
+       $insert = "INSERT INTO customers (full_name, email, phone) 
+           VALUES ('Guest', '$email', '$phone')";
         mysqli_query($conn, $insert);
 
         $_SESSION['customer_id'] = mysqli_insert_id($conn);
@@ -169,6 +169,5 @@ if(isset($_POST['login'])){
     </form>
 
 </div>
-
 </body>
 </html>
