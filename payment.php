@@ -15,26 +15,23 @@ if(isset($_POST['pay'])){
     $method = mysqli_real_escape_string($conn, $_POST['payment_method']);
     
     if($method == "Cash" || $method == "Card"){
-        // Insert into billing table
         $total = $order['total_amount'];
-        mysqli_query($conn,"INSERT INTO billing (order_id, subtotal, tax, total) VALUES ('$order_id', '$total', 0, '$total')");
+        $customer_id = $order['customer_id'];
         
+        // Log transaction in dedicated payments table
+        mysqli_query($conn,"INSERT INTO payments (order_id, customer_id, amount, method, status) VALUES ('$order_id', '$customer_id', '$total', '$method', 'Pending')");
+
         // Update order status
         mysqli_query($conn,"
             UPDATE orders 
-            SET payment_status='pending', payment_method='$method', status='confirmed'
+            SET status='confirmed'
             WHERE order_id='$order_id'
         ");
         echo "<script>alert('Order Placed successfully! Please pay at the counter.'); window.location='customer_dashboard.php';</script>";
         exit();
     } 
     else if($method == "UPI"){
-        // Set method, but redirect for payment proof
-        mysqli_query($conn,"
-            UPDATE orders 
-            SET payment_method='UPI'
-            WHERE order_id='$order_id'
-        ");
+        // Redirect for payment proof
         header("Location: upi_payment.php?order_id=".$order_id);
         exit();
     }

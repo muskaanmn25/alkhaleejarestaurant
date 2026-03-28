@@ -9,9 +9,10 @@ if(!isset($_SESSION['admin_id'])){
 }
 
 // Get today's orders
-$query = "SELECT orders.*, customers.full_name AS customer_name, customers.email
+$query = "SELECT orders.*, customers.full_name AS customer_name, customers.email, payments.status AS payment_status, payments.method AS payment_method
           FROM orders
           JOIN customers ON orders.customer_id = customers.customer_id
+          LEFT JOIN payments ON orders.order_id = payments.order_id
           WHERE DATE(order_date) = CURDATE()
           ORDER BY order_date DESC";
           

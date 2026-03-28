@@ -1,0 +1,72 @@
+*************************** 1. row ***************************
+      order_id: 1
+reservation_id: NULL
+    order_type: dine_in
+*************************** 2. row ***************************
+      order_id: 2
+reservation_id: NULL
+    order_type: dine_in
+*************************** 3. row ***************************
+      order_id: 3
+reservation_id: NULL
+    order_type: dine_in
+*************************** 4. row ***************************
+      order_id: 4
+reservation_id: NULL
+    order_type: dine_in
+*************************** 5. row ***************************
+      order_id: 5
+reservation_id: NULL
+    order_type: dine_in
+*************************** 6. row ***************************
+      order_id: 6
+reservation_id: NULL
+    order_type: dine_in
+*************************** 7. row ***************************
+      order_id: 7
+reservation_id: NULL
+    order_type: dine_in
+*************************** 8. row ***************************
+      order_id: 8
+reservation_id: NULL
+    order_type: dine_in
+*************************** 9. row ***************************
+      order_id: 9
+reservation_id: NULL
+    order_type: dine_in
+*************************** 10. row ***************************
+      order_id: 10
+reservation_id: NULL
+    order_type: parcel
+*************************** 11. row ***************************
+      order_id: 11
+reservation_id: NULL
+    order_type: dine_in
+*************************** 12. row ***************************
+      order_id: 12
+reservation_id: NULL
+    order_type: dine_in
+*************************** 13. row ***************************
+      order_id: 13
+reservation_id: NULL
+    order_type: dine_in
+*************************** 14. row ***************************
+      order_id: 14
+reservation_id: NULL
+    order_type: dine_in
+*************************** 15. row ***************************
+      order_id: 15
+reservation_id: NULL
+    order_type: dine_in
+*************************** 16. row ***************************
+      order_id: 16
+reservation_id: NULL
+    order_type: dine_in
+*************************** 17. row ***************************
+      order_id: 17
+reservation_id: NULL
+    order_type: dine_in
+*************************** 18. row ***************************
+      order_id: 18
+reservation_id: NULL
+    order_type: dine_in

@@ -17,15 +17,15 @@ if (isset($_GET['order_id'])) {
 
 if (isset($_POST['paid'])) {
     $total = $order['total_amount'];
-    $payment_proof = ""; // Left empty deliberately since upload was removed
-
-    // Insert into billing table
-    mysqli_query($conn, "INSERT INTO billing (order_id, subtotal, tax, total) VALUES ('$order_id', '$total', 0, '$total')");
+    $customer_id = $order['customer_id'];
+    
+    // Log transaction in dedicated payments table
+    mysqli_query($conn,"INSERT INTO payments (order_id, customer_id, amount, method, status) VALUES ('$order_id', '$customer_id', '$total', 'UPI', 'Pending')");
 
     // Update order status
     mysqli_query($conn, "
         UPDATE orders 
-        SET payment_status='pending_verification', status='confirmed', payment_proof='$payment_proof'
+        SET status='confirmed'
         WHERE order_id='$order_id'
     ");
 

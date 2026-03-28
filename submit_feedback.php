@@ -16,8 +16,9 @@ if(isset($_POST['submit_feedback'])){
     $c_email = mysqli_real_escape_string($conn, $_POST['email'] ?? '');
     $rating = intval($_POST['rating'] ?? 5);
     $comments = mysqli_real_escape_string($conn, $_POST['comments'] ?? $_POST['message'] ?? '');
+    $customer_id = $_SESSION['customer_id'];
 
-    $q = "INSERT INTO feedback (customer_name, email, rating, comments, status) VALUES ('$c_name', '$c_email', '$rating', '$comments', 'approved')";
+    $q = "INSERT INTO feedback (customer_id, customer_name, email, rating, comments, status) VALUES ('$customer_id', '$c_name', '$c_email', '$rating', '$comments', 'approved')";
     if(mysqli_query($conn, $q)){
         $msg = "Thank you! Your feedback has been submitted successfully.";
     } else {

@@ -10,7 +10,8 @@ require_once "db.php";
 if(isset($_POST['update_status'])){
     $order_id = $_POST['order_id'];
     $status = $_POST['status'];
-    mysqli_query($conn,"UPDATE orders SET status='$status' WHERE order_id='$order_id'");
+    $staff_id = $_SESSION['staff_id'];
+    mysqli_query($conn,"UPDATE orders SET status='$status', staff_id='$staff_id' WHERE order_id='$order_id'");
     header("Location: staff_orders.php");
     exit();
 }
@@ -18,7 +19,12 @@ if(isset($_POST['update_status'])){
 /* ===== UPDATE PAYMENT STATUS ===== */
 if(isset($_POST['mark_paid'])){
     $order_id = $_POST['order_id'];
-    mysqli_query($conn,"UPDATE orders SET payment_status='paid' WHERE order_id='$order_id'");
+    $staff_id = $_SESSION['staff_id'];
+    
+    // Mark dedicated payment row as complete too
+    mysqli_query($conn,"UPDATE payments SET status='Paid', staff_id='$staff_id' WHERE order_id='$order_id'");
+    
+    mysqli_query($conn,"UPDATE orders SET staff_id='$staff_id' WHERE order_id='$order_id'");
     header("Location: staff_orders.php");
     exit();
 }
@@ -34,11 +40,18 @@ if(isset($_GET['delete'])){
 /* ===== FETCH ORDERS ===== */
 $orders = mysqli_query($conn,"
     SELECT o.*, 
+           s.name as staff_name,
+           p.status as payment_status,
+           p.method as payment_method,
+           r.table_number,
            (SELECT GROUP_CONCAT(CONCAT(m.item_name, ' (x', oi.quantity, ')') SEPARATOR ', ')
             FROM order_items oi
             JOIN menu m ON oi.menu_id = m.menu_id
             WHERE oi.order_id = o.order_id) as items_list
     FROM orders o 
+    LEFT JOIN staff s ON o.staff_id = s.staff_id
+    LEFT JOIN payments p ON p.order_id = o.order_id
+    LEFT JOIN reservation r ON r.reservation_id = o.reservation_id
     ORDER BY o.order_id DESC
 ");
 ?>
@@ -106,6 +119,7 @@ $orders = mysqli_query($conn,"
             <th>Type</th>
             <th>Amount</th>
             <th>Items Ordered</th>
+            <th>Handled By</th>
             <th>Order Status</th>
             <th>Payment</th>
             <th>Action</th>
@@ -116,9 +130,28 @@ $orders = mysqli_query($conn,"
         <tr>
             <td><?php echo $row['order_id']; ?></td>
             <td><?php echo date('M d, H:i', strtotime($row['order_date'])); ?></td>
-            <td><?php echo ucfirst(str_replace('_', ' ', $row['order_type'])); ?></td>
+            <td>
+                <?php 
+                echo ucfirst(str_replace('_', ' ', $row['order_type'])); 
+                if($row['order_type'] == 'dine_in' && !empty($row['reservation_id'])){
+                    echo "<br><small style='color:#777;'>Res #".$row['reservation_id']."</small>";
+                    if(!empty($row['table_number'])){
+                        echo "<br><span style='background:#f4efec; padding:2px 5px; border-radius:3px; font-size:11px; color:#7a1f2b; font-weight:600;'>Table: ".$row['table_number']."</span>";
+                    }
+                }
+                ?>
+            </td>
             <td style="font-weight:600;">₹ <?php echo $row['total_amount']; ?></td>
             <td style="font-size:0.9em; max-width:200px; text-align:left;"><?php echo $row['items_list'] ?? 'No items'; ?></td>
+
+            <td style="font-size:0.9em;">
+                <?php if($row['staff_id']): ?>
+                    <strong><?php echo htmlspecialchars($row['staff_name']); ?></strong><br>
+                    <small style="color:#777;">ID: <?php echo $row['staff_id']; ?></small>
+                <?php else: ?>
+                    <span style="color:#aaa; font-style:italic;">Not assigned</span>
+                <?php endif; ?>
+            </td>
 
             <td class="status-<?php echo strtolower($row['status']); ?>">
                 <?php echo ucfirst($row['status']); ?>
