@@ -4,14 +4,21 @@ if(!isset($_SESSION['staff_id'])){
     header("Location: staff_login.php");
     exit();
 }
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){ die("Connection Failed: " . mysqli_connect_error()); }
+require_once "db.php";
 
 /* ===== UPDATE ORDER STATUS ===== */
 if(isset($_POST['update_status'])){
     $order_id = $_POST['order_id'];
     $status = $_POST['status'];
     mysqli_query($conn,"UPDATE orders SET status='$status' WHERE order_id='$order_id'");
+    header("Location: staff_orders.php");
+    exit();
+}
+
+/* ===== UPDATE PAYMENT STATUS ===== */
+if(isset($_POST['mark_paid'])){
+    $order_id = $_POST['order_id'];
+    mysqli_query($conn,"UPDATE orders SET payment_status='paid' WHERE order_id='$order_id'");
     header("Location: staff_orders.php");
     exit();
 }
@@ -59,6 +66,7 @@ $orders = mysqli_query($conn,"
     th, td { padding:15px; text-align:center; border-bottom:1px solid #ddd; font-size: 14px; }
     th { background:#7a1f2b; color:white; font-weight:500; }
     .status-pending { color: orange; font-weight: bold; }
+    .status-confirmed { color: #2ecc71; font-weight: bold; }
     .status-preparing { color: blue; font-weight: bold; }
     .status-completed { color: green; font-weight: bold; }
     .status-cancelled { color: red; font-weight: bold; }
@@ -67,6 +75,10 @@ $orders = mysqli_query($conn,"
     .btn-update { background:#7a1f2b; } .btn-update:hover{ background:#631723; }
     .btn-view { background:#258752; text-decoration:none; padding:8px 12px; border-radius:5px; color:white; display:inline-block; } .btn-view:hover{ background:#1b663e; }
     .btn-delete { background:#c92a2a; text-decoration:none; padding:8px 12px; border-radius:5px; color:white; display:inline-block; } .btn-delete:hover{ background:#a02222; }
+    
+    .pay-status-paid { color: #2ecc71; font-weight: bold; }
+    .pay-status-pending { color: orange; font-weight: bold; }
+    .pay-status-unverified { color: #f39c12; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -90,21 +102,19 @@ $orders = mysqli_query($conn,"
         <table>
         <tr>
             <th>ID</th>
-            <th>C.ID</th>
             <th>Date</th>
             <th>Type</th>
             <th>Amount</th>
             <th>Items Ordered</th>
-            <th>Status</th>
-            <th>Update</th>
+            <th>Order Status</th>
+            <th>Payment</th>
+            <th>Action</th>
             <th>View</th>
-            <th>Delete</th>
         </tr>
 
         <?php while($row = mysqli_fetch_assoc($orders)){ ?>
         <tr>
             <td><?php echo $row['order_id']; ?></td>
-            <td><?php echo $row['customer_id']; ?></td>
             <td><?php echo date('M d, H:i', strtotime($row['order_date'])); ?></td>
             <td><?php echo ucfirst(str_replace('_', ' ', $row['order_type'])); ?></td>
             <td style="font-weight:600;">₹ <?php echo $row['total_amount']; ?></td>
@@ -115,24 +125,42 @@ $orders = mysqli_query($conn,"
             </td>
 
             <td>
+                <?php 
+                    $p_stat = strtolower($row['payment_status']);
+                    $p_class = 'pay-status-pending';
+                    if($p_stat == 'paid') $p_class = 'pay-status-paid';
+                    if($p_stat == 'pending_verification') $p_class = 'pay-status-unverified';
+                ?>
+                <span class="<?php echo $p_class; ?>"><?php echo ucfirst(str_replace('_', ' ', $row['payment_status'])); ?></span>
+                <br>
+                <small style="color:#777;">(<?php echo $row['payment_method']; ?>)</small>
+                
+                <?php if($p_stat != 'paid'){ ?>
+                <form method="POST" style="margin-top:5px;">
+                    <input type="hidden" name="order_id" value="<?php echo $row['order_id']; ?>">
+                    <button name="mark_paid" style="background:#2ecc71; font-size:11px; padding:4px 8px;">Mark Paid</button>
+                </form>
+                <?php } ?>
+            </td>
+
+            <td>
                 <form method="POST" style="display:flex; gap:5px; flex-direction:column;">
                     <input type="hidden" name="order_id" value="<?php echo $row['order_id']; ?>">
                     <select name="status">
                         <option value="pending" <?php if($row['status']=='pending') echo "selected"; ?>>Pending</option>
+                        <option value="confirmed" <?php if($row['status']=='confirmed') echo "selected"; ?>>Confirmed</option>
                         <option value="preparing" <?php if($row['status']=='preparing') echo "selected"; ?>>Preparing</option>
                         <option value="completed" <?php if($row['status']=='completed') echo "selected"; ?>>Completed</option>
                         <option value="cancelled" <?php if($row['status']=='cancelled') echo "selected"; ?>>Cancelled</option>
                     </select>
-                    <button name="update_status" class="btn-update">Update</button>
+                    <button name="update_status" class="btn-update" style="padding:6px;">Update</button>
                 </form>
             </td>
 
             <td>
-                <a href="view_order.php?order_id=<?php echo $row['order_id']; ?>" class="btn-view">View</a>
-            </td>
-
-            <td>
-                <a href="staff_orders.php?delete=<?php echo $row['order_id']; ?>" class="btn-delete" onclick="return confirm('Are you sure?');">Delete</a>
+                <a href="view_order.php?order_id=<?php echo $row['order_id']; ?>" class="btn-view" style="margin-bottom:5px;">View</a>
+                <br>
+                <a href="staff_orders.php?delete=<?php echo $row['order_id']; ?>" class="btn-delete" style="font-size:12px; padding:4px 8px;" onclick="return confirm('Are you sure?');">Delete</a>
             </td>
         </tr>
         <?php } ?>

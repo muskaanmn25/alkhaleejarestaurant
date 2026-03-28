@@ -2,12 +2,13 @@
 session_start();
 include "db.php";
 
-$name = '';
-$email = '';
-if(isset($_SESSION['customer_id'])) {
-    $email = $_SESSION['customer_email'];
-    $name = explode('@', $email)[0];
+if(!isset($_SESSION['customer_id'])) {
+    header("Location: customer_login.php");
+    exit();
 }
+
+$email = $_SESSION['customer_email'];
+$name = explode('@', $email)[0];
 
 $msg = '';
 if(isset($_POST['submit_feedback'])){

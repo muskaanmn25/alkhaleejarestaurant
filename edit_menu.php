@@ -8,7 +8,17 @@ if(!isset($_SESSION['admin_id'])){
     exit();
 }
 
-if(isset($_POST['add'])){
+$id = intval($_GET['id']);
+$result = mysqli_query($conn, "SELECT * FROM menu WHERE menu_id=$id");
+
+if (mysqli_num_rows($result) == 0) {
+    echo "<script>alert('Menu item not found.'); window.location='manage_menu.php';</script>";
+    exit();
+}
+
+$row = mysqli_fetch_assoc($result);
+
+if(isset($_POST['update'])){
     $item_name = mysqli_real_escape_string($conn, $_POST['item_name']);
     $category = mysqli_real_escape_string($conn, $_POST['category']);
     $price = $_POST['price'];
@@ -16,12 +26,17 @@ if(isset($_POST['add'])){
     $availability = $_POST['availability'];
     $status = $_POST['status'];
 
-    $query = "INSERT INTO menu 
-        (item_name, category, price, description, availability, status)
-        VALUES
-        ('$item_name', '$category', '$price', '$description', '$availability', '$status')";
+    $query = "UPDATE menu SET 
+        item_name='$item_name',
+        category='$category',
+        price='$price',
+        description='$description',
+        availability='$availability',
+        status='$status'
+        WHERE menu_id=$id";
 
     mysqli_query($conn, $query);
+    
     header("Location: manage_menu.php");
     exit();
 }
@@ -29,7 +44,7 @@ if(isset($_POST['add'])){
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Menu Item - Admin Panel</title>
+    <title>Edit Menu Item - Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
@@ -70,7 +85,7 @@ if(isset($_POST['add'])){
 
 <div class="main">
     <div class="topbar">
-        <h1>Add Menu Item</h1>
+        <h1>Edit Menu Item</h1>
         <form action="logout.php" method="POST">
             <button class="logout">Logout</button>
         </form>
@@ -83,42 +98,41 @@ if(isset($_POST['add'])){
 
             <div class="form-group">
                 <label>Item Name</label>
-                <input type="text" name="item_name" required>
+                <input type="text" name="item_name" value="<?= htmlspecialchars($row['item_name']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label>Category</label>
-                <input type="text" name="category" required>
+                <input type="text" name="category" value="<?= htmlspecialchars($row['category']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label>Price (₹)</label>
-                <input type="number" step="0.01" name="price" required>
+                <input type="number" step="0.01" name="price" value="<?= $row['price']; ?>" required>
             </div>
 
             <div class="form-group">
                 <label>Description</label>
-                <textarea name="description" rows="3"></textarea>
+                <textarea name="description" rows="3"><?= htmlspecialchars($row['description']); ?></textarea>
             </div>
-
 
             <div class="form-group">
                 <label>Availability</label>
                 <select name="availability">
-                    <option value="available">Available</option>
-                    <option value="not_available">Not Available</option>
+                    <option value="available" <?= ($row['availability']=="available")?"selected":""; ?>>Available</option>
+                    <option value="not_available" <?= ($row['availability']=="not_available")?"selected":""; ?>>Not Available</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>Status</label>
                 <select name="status">
-                    <option value="available">Available</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="available" <?= ($row['status']=="available")?"selected":""; ?>>Available</option>
+                    <option value="inactive" <?= ($row['status']=="inactive")?"selected":""; ?>>Inactive</option>
                 </select>
             </div>
 
-            <button type="submit" name="add" class="btn-submit">Add Item</button>
+            <button type="submit" name="update" class="btn-submit">Update Item</button>
 
         </form>
     </div>

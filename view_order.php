@@ -6,10 +6,7 @@ if(!isset($_SESSION['staff_id'])){
     exit();
 }
 
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){
-    die("Connection Failed: " . mysqli_connect_error());
-}
+require_once "db.php";
 
 if(!isset($_GET['order_id'])){
     header("Location: staff_orders.php");

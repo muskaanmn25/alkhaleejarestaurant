@@ -4,8 +4,7 @@ if(!isset($_SESSION['staff_id'])){
     header("Location: staff_login.php");
     exit();
 }
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){ die("Connection Failed: " . mysqli_connect_error()); }
+require_once "db.php";
 
 $totalOrders = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM orders"))['total'] ?? 0;
 $pendingOrders = mysqli_fetch_assoc(mysqli_query($conn,"SELECT COUNT(*) as total FROM orders WHERE status='pending'"))['total'] ?? 0;

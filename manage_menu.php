@@ -75,7 +75,6 @@ $result = mysqli_query($conn, "SELECT * FROM menu ORDER BY menu_id DESC");
         <table>
         <tr>
             <th>ID</th>
-            <th>Image</th>
             <th>Name</th>
             <th>Category</th>
             <th>Price</th>
@@ -87,18 +86,13 @@ $result = mysqli_query($conn, "SELECT * FROM menu ORDER BY menu_id DESC");
         <?php while($row = mysqli_fetch_assoc($result)) { ?>
         <tr>
             <td><?= $row['menu_id']; ?></td>
-            <td>
-                <?php if($row['image']) { ?>
-                    <img src="uploads/<?= $row['image']; ?>">
-                <?php } else { echo "-"; } ?>
-            </td>
             <td><?= $row['item_name']; ?></td>
             <td><?= $row['category']; ?></td>
             <td>₹ <?= $row['price']; ?></td>
             <td><?= ucfirst(str_replace('_', ' ', $row['availability'])); ?></td>
             <td><?= ucfirst($row['status']); ?></td>
             <td>
-                <!-- <a href="edit_menu.php?id=<?= $row['menu_id']; ?>" class="btn edit">Edit</a> -->
+                <a href="edit_menu.php?id=<?= $row['menu_id']; ?>" class="btn edit">Edit</a>
                 <a href="manage_menu.php?delete=<?= $row['menu_id']; ?>" class="btn delete" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
             </td>
         </tr>

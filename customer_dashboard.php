@@ -1,7 +1,6 @@
 <?php
 session_start();
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){ die("Connection Failed: " . mysqli_connect_error()); }
+require_once "db.php";
 
 if(!isset($_SESSION['customer_id'])){
     header("Location: customer_login.php");
@@ -116,7 +115,7 @@ function decreaseQty(btn){let i=btn.parentElement.querySelector("input"); if(i.v
     <h1>Al-Khaleej</h1>
     <div class="nav-links">
         <a href="customer_dashboard.php">Menu</a>
-        <a href="track_reservation.php">Reservations</a>
+        <a href="submit_feedback.php">Feedback</a>
         <a href="logout.php">Logout</a>
     </div>
 </div>
@@ -155,13 +154,6 @@ while($cat=mysqli_fetch_assoc($cat_query)){
         while($m=mysqli_fetch_assoc($q)){ 
         ?>
             <div class="menu-card">
-                <?php if(!empty($m['image'])) { ?>
-                    <img src="uploads/<?php echo $m['image']; ?>" class="menu-img" alt="<?php echo $m['item_name']; ?>">
-                <?php } else { ?>
-                    <!-- Placeholder if no image -->
-                    <div class="menu-img" style="display:flex; justify-content:center; align-items:center; background:#eee; color:#aaa; font-size:40px;">🍽️</div>
-                <?php } ?>
-                
                 <div class="menu-content">
                     <div class="menu-title-row">
                         <span class="menu-title"><?php echo $m['item_name'];?></span>

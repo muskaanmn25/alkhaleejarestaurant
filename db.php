@@ -7,9 +7,10 @@ $db   = "alkhaleej_db";
 $conn = mysqli_connect($host, $user, $pass, $db);
 
 if (!$conn) {
-    // Detailed error message
     die("Connection failed: " . mysqli_connect_error());
 }
 
-
+// Ensure correct timezone across all date functions and database inserts
+date_default_timezone_set('Asia/Kolkata');
+mysqli_query($conn, "SET time_zone = '+05:30'");
 ?>

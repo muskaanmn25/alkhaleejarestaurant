@@ -1,7 +1,6 @@
 <?php
 session_start();
-$conn = mysqli_connect("localhost","root","","alkhaleej_db");
-if(!$conn){ die("Connection Failed: " . mysqli_connect_error()); }
+require_once "db.php";
 
 if(!isset($_SESSION['customer_id'])){
     header("Location: customer_login.php");
@@ -67,7 +66,7 @@ if(isset($_POST['place_order'])){
         }
 
         $order_date = date('Y-m-d H:i:s');
-        $order_type = 'Delivery'; 
+        $order_type = isset($_POST['order_type']) ? mysqli_real_escape_string($conn, $_POST['order_type']) : 'dine_in';
         $status = 'pending';
 
         $order_query = mysqli_query($conn,"INSERT INTO orders (customer_id, order_date, order_type, total_amount, status) VALUES ('$customer_id', '$order_date', '$order_type', '$total', '$status')");
@@ -138,8 +137,9 @@ td { font-weight:500; color:#333; }
 
 <div class="navbar">
     <h1>Al-Khaleej</h1>
-    <div>
+    <div class="nav-links">
         <a href="customer_dashboard.php">Menu</a>
+        <a href="submit_feedback.php">Feedback</a>
         <a href="logout.php">Logout</a>
     </div>
 </div>
@@ -204,6 +204,13 @@ td { font-weight:500; color:#333; }
                 </div>
                 
                 <form method="POST">
+                    <div style="margin-bottom: 20px; text-align: left; width: 300px;">
+                        <label style="font-weight: 500; font-size: 16px; display: block; margin-bottom: 8px;">Order Type</label>
+                        <select name="order_type" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 16px;" required>
+                            <option value="dine_in">Dine In (Table Service)</option>
+                            <option value="parcel">Parcel (Takeaway)</option>
+                        </select>
+                    </div>
                     <button name="place_order" class="btn-checkout">Proceed to Checkout</button>
                 </form>
             </div>

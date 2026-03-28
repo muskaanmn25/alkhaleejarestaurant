@@ -9,7 +9,7 @@ if(!isset($_SESSION['admin_id'])){
 }
 
 // Get today's orders
-$query = "SELECT orders.*, customers.full_name AS customer_name
+$query = "SELECT orders.*, customers.full_name AS customer_name, customers.email
           FROM orders
           JOIN customers ON orders.customer_id = customers.customer_id
           WHERE DATE(order_date) = CURDATE()
@@ -112,6 +112,7 @@ th{
     font-weight:500;
 }
 .status-pending { color: orange; font-weight: bold; }
+.status-confirmed { color: #2ecc71; font-weight: bold; }
 .status-preparing { color: blue; font-weight: bold; }
 .status-completed { color: green; font-weight: bold; }
 </style>
@@ -146,20 +147,30 @@ th{
             <th>Order Type</th>
             <th>Total Amount</th>
             <th>Status</th>
+            <th>Payment Type</th>
             <th>Order Time</th>
         </tr>
 
         <?php 
         if(mysqli_num_rows($result) > 0) {
             while($row = mysqli_fetch_assoc($result)) { 
+                $display_name = !empty($row['customer_name']) ? htmlspecialchars($row['customer_name']) : 'Guest';
+                if(strtolower($display_name) == 'guest' && !empty($row['email'])) {
+                    $email_parts = explode('@', $row['email']);
+                    $display_name = ucfirst(htmlspecialchars($email_parts[0]));
+                }
         ?>
         <tr>
             <td><?php echo $row['order_id']; ?></td>
-            <td><?php echo $row['customer_name']; ?></td>
-            <td><?php echo $row['order_type']; ?></td>
-            <td>₹ <?php echo $row['total_amount']; ?></td>
+            <td><?php echo $display_name; ?></td>
+            <td><?php echo ucfirst(str_replace('_', ' ', $row['order_type'])); ?></td>
+            <td style="font-weight:600;">₹ <?php echo $row['total_amount']; ?></td>
             <td class="status-<?php echo $row['status']; ?>"><?php echo ucfirst($row['status']); ?></td>
-            <td><?php echo $row['order_date']; ?></td>
+            <td>
+                <?php echo ucfirst($row['payment_status']); ?>
+                <?php if(!empty($row['payment_method'])) { echo "<br><small style='color:#777;'>({$row['payment_method']})</small>"; } ?>
+            </td>
+            <td><?php echo date('h:i A', strtotime($row['order_date'])); ?></td>
         </tr>
         <?php 
             } 

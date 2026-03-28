@@ -234,7 +234,7 @@
             <h1>Al-Khaleej</h1>
             <p>Experience authentic Arabian flavors in an atmosphere of luxury and tradition.</p>
 
-            <button class="hero-btn">View Our Menu</button>
+            <button class="hero-btn" onclick="window.location.href='public_menu.php'">View Our Menu</button>
             <button class="hero-btn" onclick="openForm()">Reserve a Table</button>
 
         </div>
@@ -265,13 +265,6 @@
         </div>
     </section>
 
-    <!-- FEEDBACK SECTION -->
-    <section class="feedback-section" style="padding: 60px 40px; background: white; text-align: center;">
-        <h2 style="font-family: 'Playfair Display', serif; font-size: 38px; margin-bottom: 30px; color: #7a2c2c;">What Our Guests Say</h2>
-        <div id="feedback-container" style="display:flex; justify-content:center; gap:30px; flex-wrap:wrap;">
-            <!-- Fetched dynamically -->
-        </div>
-    </section>
 
     <!-- FOOTER -->
     <footer>
@@ -302,28 +295,7 @@
                 function closeForm() {
                     document.getElementById("reserveForm").style.display = "none";
                 }
-                
-                // Fetch Feedback
-                fetch('fetch_feedback.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        const container = document.getElementById('feedback-container');
-                        if(data.length === 0){
-                            container.innerHTML = "<p>No feedback yet. Be the first to leave a review!</p>";
-                        } else {
-                            data.forEach(item => {
-                                let stars = '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating);
-                                let cardHtml = `
-                                    <div style="background:#f9f9f9; padding:30px; border-radius:10px; width:300px; box-shadow:0 5px 15px rgba(0,0,0,0.05); text-align:left;">
-                                        <div style="color:gold; font-size:24px; margin-bottom:10px;">${stars}</div>
-                                        <p style="font-style:italic; color:#555; margin-bottom:20px; font-size:15px;">"${item.comments}"</p>
-                                        <h4 style="font-family:'Playfair Display', serif; color:#111;">- ${item.customer_name}</h4>
-                                    </div>
-                                `;
-                                container.innerHTML += cardHtml;
-                            });
-                        }
-                    });
+
             </script>
 
 </body>
