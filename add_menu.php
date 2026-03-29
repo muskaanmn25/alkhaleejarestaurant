@@ -16,14 +16,21 @@ if(isset($_POST['add'])){
     $availability = $_POST['availability'];
     $status = $_POST['status'];
 
-    $query = "INSERT INTO menu 
-        (item_name, category, price, description, availability, status)
-        VALUES
-        ('$item_name', '$category', '$price', '$description', '$availability', '$status')";
+    $check_query = "SELECT * FROM menu WHERE item_name = '$item_name'";
+    $check_result = mysqli_query($conn, $check_query);
 
-    mysqli_query($conn, $query);
-    header("Location: manage_menu.php");
-    exit();
+    if(mysqli_num_rows($check_result) > 0) {
+        $error = "Menu item '$item_name' already exists!";
+    } else {
+        $query = "INSERT INTO menu 
+            (item_name, category, price, description, availability, status)
+            VALUES
+            ('$item_name', '$category', '$price', '$description', '$availability', '$status')";
+
+        mysqli_query($conn, $query);
+        header("Location: manage_menu.php");
+        exit();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -79,6 +86,11 @@ if(isset($_POST['add'])){
     <a href="manage_menu.php" class="btn-back">← Back to Menu List</a>
 
     <div class="form-container">
+        <?php if(isset($error)){ ?>
+            <div style="background:#f8d7da; color:#721c24; padding:10px; border-radius:5px; margin-bottom:15px; border:1px solid #f5c6cb; text-align:center;">
+                <?= $error ?>
+            </div>
+        <?php } ?>
         <form method="POST">
 
             <div class="form-group">
@@ -123,6 +135,5 @@ if(isset($_POST['add'])){
         </form>
     </div>
 </div>
-
 </body>
 </html>
