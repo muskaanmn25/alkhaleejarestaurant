@@ -1,9 +1,0 @@
-Field	Type	Null	Key	Default	Extra
-order_id	int(11)	NO	PRI	NULL	auto_increment
-customer_id	int(11)	NO	MUL	NULL	
-reservation_id	int(11)	YES	MUL	NULL	
-order_date	timestamp	NO		current_timestamp()	
-order_type	enum('dine_in','parcel')	YES		dine_in	
-status	enum('pending','confirmed','preparing','served','completed','cancelled')	YES		pending	
-total_amount	decimal(10,2)	YES		0.00	
-staff_id	int(11)	YES	MUL	NULL	
