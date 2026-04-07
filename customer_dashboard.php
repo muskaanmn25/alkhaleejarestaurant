@@ -30,6 +30,7 @@ $cart_count = $count_data['total'] ?? 0;
 if(isset($_POST['add_to_cart'])){
     $menu_id = intval($_POST['menu_id']);
     $qty = intval($_POST['quantity']);
+    $cat_id_post = isset($_POST['cat_id']) ? $_POST['cat_id'] : '';
 
     $check = mysqli_query($conn,"SELECT * FROM cart_items WHERE cart_id='$cart_id' AND menu_id='$menu_id'");
     if(mysqli_num_rows($check) > 0){
@@ -37,7 +38,12 @@ if(isset($_POST['add_to_cart'])){
     } else {
         mysqli_query($conn,"INSERT INTO cart_items(cart_id,menu_id,quantity) VALUES('$cart_id','$menu_id','$qty')");
     }
-    header("Location: customer_dashboard.php");
+    
+    $redirect = "customer_dashboard.php";
+    if(!empty($cat_id_post)) {
+        $redirect .= "?cat=" . urlencode($cat_id_post);
+    }
+    header("Location: " . $redirect);
     exit();
 }
 ?>
@@ -131,11 +137,14 @@ function decreaseQty(btn){let i=btn.parentElement.querySelector("input"); if(i.v
 <?php
 $cat_query=mysqli_query($conn,"SELECT DISTINCT category FROM menu WHERE status='available'");
 $i=0;
+$active_cat = isset($_GET['cat']) ? $_GET['cat'] : '';
 ?>
 <div class="tabs-container">
 <?php while($cat=mysqli_fetch_assoc($cat_query)){ 
-$cat_id=str_replace(' ','_',$cat['category']); ?>
-    <button class="tab-btn <?php if($i==0) echo 'active';?>" onclick="showCategory('<?php echo $cat_id;?>',this)">
+$cat_id=str_replace(' ','_',$cat['category']); 
+$is_active = ($active_cat === $cat_id) || ($active_cat === '' && $i === 0);
+?>
+    <button class="tab-btn <?php if($is_active) echo 'active';?>" onclick="showCategory('<?php echo $cat_id;?>',this)">
         <?php echo ucfirst($cat['category']);?>
     </button>
 <?php $i++; } ?>
@@ -146,8 +155,9 @@ mysqli_data_seek($cat_query,0);
 $i=0;
 while($cat=mysqli_fetch_assoc($cat_query)){
     $cat_id=str_replace(' ','_',$cat['category']); 
+    $is_active = ($active_cat === $cat_id) || ($active_cat === '' && $i === 0);
 ?>
-    <div id="<?php echo $cat_id;?>" class="category-box" style="display:<?php echo ($i==0)?'block':'none'; ?>">
+    <div id="<?php echo $cat_id;?>" class="category-box" style="display:<?php echo $is_active ? 'block':'none'; ?>">
         <div class="menu-container">
         <?php
         $q=mysqli_query($conn,"SELECT * FROM menu WHERE category='".$cat['category']."' AND status='available'");
@@ -164,6 +174,7 @@ while($cat=mysqli_fetch_assoc($cat_query)){
                     
                     <form method="POST" class="add-cart-form">
                         <input type="hidden" name="menu_id" value="<?php echo $m['menu_id'];?>">
+                        <input type="hidden" name="cat_id" value="<?php echo $cat_id;?>">
                         <div class="qty-control">
                             <span style="font-size:14px; color:#777; font-weight:500;">Quantity</span>
                             <div>
