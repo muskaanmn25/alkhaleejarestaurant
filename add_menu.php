@@ -72,6 +72,7 @@ if(isset($_POST['add'])){
     <a href="manage_menu.php" style="background:#9e2f3d;">Manage Menu</a>
     <a href="manage_staff.php">Manage Staff</a>
     <a href="admin_orders.php">Orders</a>
+    <a href="admin_feedback.php">Customer Feedback</a>
     <a href="reports.php">Reports</a>
 </div>
 
